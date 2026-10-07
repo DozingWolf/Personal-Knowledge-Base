@@ -56,7 +56,7 @@
 ## 七、当前阶段
 
 - 已成文：方法论（01）、业务建模（02）、政策（03）、映射设计（04）、组件图（05）、模块划分（06）、平台化预留（07）。
-- 已完成：项目框架（目录、文档体系、内核与领域包骨架、[ADR 0001](docs/decisions/0001-kernel-domain-app-layers.md)、`scripts/check_framework.py`）；Python 3.12 + uv 环境；本地 Git 仓库（基线 `c636b6e`，含远端 `LICENSE`）。
-- 进行中：首次提交 `e3ccfc0` **等待用户经 GitHub Desktop 推送**。
+- 已完成：项目框架（目录、文档体系、内核与领域包骨架、[ADR 0001](docs/decisions/0001-kernel-domain-app-layers.md)、`scripts/check_framework.py`）；Python 3.12 + uv 环境；本地 Git 仓库（基线 `c636b6e`，含远端 `LICENSE`）；**行业现状与竞品调研第一轮（[discuss/08](discuss/08-行业现状与竞品调研.md)：无直接竞品、数据可订阅、上海价格基准未落地）**。
+- 进行中：**等待三项决策**——① 是否订阅商业数据（药智等）② 双时态落地方式（应用层双时态 vs XTDB）③ 是否接受"证据级别 + 定性/定量物理隔离"。详见 [discuss/08](discuss/08-行业现状与竞品调研.md) 第七节。
 - 下一步候选：**M4 本体定稿**（M3/M9 的共同前置）→ M6 词典 → V1 纵切。
 - 阻塞项：上海集采**中选清单**（需登录招采子系统）、**ERP 商品清单**（待公司交付）。
