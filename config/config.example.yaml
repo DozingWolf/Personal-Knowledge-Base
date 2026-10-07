@@ -1,0 +1,52 @@
+# 项目配置骨架（示例）
+# ---------------------------------------------------------------
+# 约定：所有可调参数集中在此类独立配置文件，代码通过统一加载入口读取，
+#       不在代码里硬编码；敏感值（token / 密码）走环境变量或 .env，
+#       由本文件以 ${VAR} 形式引用。
+# 现状：骨架阶段，字段为规划形态，按模块实施逐步填充（勿提前塞无用途的键）。
+# ---------------------------------------------------------------
+
+project:
+  name: prj-personal-knowledge-base
+  # 当前启用的领域包；台阶 2 引入第二个领域时在此并列
+  active_domains:
+    - ivd
+  data_dir: .data          # 解析产物 / 中间数据集
+  log_level: INFO
+
+# 平台内核：注册表驱动，代码内不出现领域字面量
+kernel:
+  source_registry: domains/ivd/registry.yaml   # 来源与文档类型注册
+  code_system_registry: domains/ivd/registry.yaml
+
+# 存储：选型确认「关系型 + 显式边表」起步
+storage:
+  kind: sqlite             # sqlite | postgres （图库留待需要任意路径探索时再评估）
+  url: sqlite:///.data/kb.sqlite3
+  vector_store: null       # 待消解合并（M5）需要时再定
+  document_store: discuss/sources/raw
+
+# 采集（M1）：每个来源声明限速与重试，不写死在代码里
+ingestion:
+  user_agent: "Mozilla/5.0 (compatible; pkb-collector/0.1)"
+  rate_limit_per_second: 0.5
+  max_retries: 3
+  sources: []              # 见 domains/ivd/registry.yaml 的 source_types
+
+# 日志（C2）：统一 loguru
+logging:
+  sinks:
+    - kind: stderr
+      level: INFO
+    - kind: file
+      path: logs/pkb.log
+      level: DEBUG
+      rotation: "10 MB"
+      retention: "30 days"
+
+# 治理（C1）：不可逆决策的运行期开关
+governance:
+  append_only_assertions: true   # 禁止覆盖式更新
+  bitemporal: true               # 有效时间 / 事务时间分列
+  require_evidence_span: true    # 断言必须带原文位置
+  require_domain_tag: true       # 数据契约必须带 domain + schema_version + as-of

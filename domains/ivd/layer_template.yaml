@@ -1,0 +1,102 @@
+# IVD 贸易：六层传导栈（层级模板）
+# ------------------------------------------------------------------
+# 用途：内核的影响图引擎（core/impact）读本文件装配"分层传导"能力。
+# 六层不是内核写死的——换一个领域就是另一个模板文件。
+# 来源：discuss/02 第 2.3 节、discuss/03 第六节。
+# 状态：已成文（层次与机制确定；每层的实体类型引用 domains/ivd/ontology，待 M4 定稿）
+# ------------------------------------------------------------------
+
+template_id: ivd.supply_chain.v1
+domain: ivd
+name: IVD 贸易六层传导栈
+version: 0.1
+principle: >
+  政策不直接作用在"产品"上，而是作用在"检验项目"上，再穿透到营收。
+  没有中间三层，只能看到"涨了跌了"，看不到"为什么"，更做不了推演。
+
+layers:
+  - id: policy
+    order: 1
+    name: 政策层
+    contains: [Policy, Tender]
+    examples: [集采, DRG-DIP, 检验结果互认, 医疗服务价格调整, 国产替代, 注册法规]
+    note: 政策的发布与生效时点、作用地域、强度参数在此层
+
+  - id: payment
+    order: 2
+    name: 支付层
+    contains: [PriceRuleSet]
+    examples: [项目收费价, 医保支付标准, 医院成本核算口径]
+    note: 政策改变支付与准入，此层是政策"翻译"成钱的地方
+
+  - id: test_item
+    order: 3
+    name: 检测项目层
+    contains: [TestItem, Analyte, Panel]
+    examples: [ALT, 肌酐, CEA, TSH, CRP]
+    note: 政策的作用单元；集采与立项指南都作用在这一层
+
+  - id: product
+    order: 4
+    name: 产品层
+    contains: [Product, Registration, Methodology]
+    examples: [品牌 × 型号 × 方法学 × 平台]
+    note: 检测项目与产品多对多映射；注册证决定准入，方法学形成替代关系
+
+  - id: sku
+    order: 5
+    name: SKU 层
+    contains: [Sku]
+    examples: [合同, 采购价, 销售价, 库存]
+    note: 产品与 SKU 多对多映射
+
+  - id: revenue
+    order: 6
+    name: 营收层
+    contains: [Revenue]
+    examples: [实际收入与毛利]
+    note: 第二阶段接入内部数据后才有真值
+
+edges:
+  - from: policy
+    to: payment
+    mechanism: [price, access]
+    direction: both              # 收紧与放宽都存在
+    default_lag_months: [1, 6]
+    note: 政策发布 → 落地 → 挂网通常 1–6 个月
+  - from: payment
+    to: test_item
+    mechanism: [price, quantity]
+    direction: both
+    default_lag_months: [1, 6]
+    note: 收费下降改变检验科开单意愿
+  - from: test_item
+    to: product
+    mechanism: [substitution]
+    direction: both
+    cardinality: many_to_many
+  - from: product
+    to: sku
+    mechanism: [substitution]
+    direction: both
+    cardinality: many_to_many
+  - from: sku
+    to: revenue
+    mechanism: [aggregate]
+    direction: forward
+  - from: revenue
+    to: payment
+    mechanism: [feedback]
+    direction: backward
+    requires_internal_data: true  # 第二阶段
+
+mechanics:                       # 影响机制枚举（ImpactEdge.mechanism 取值）
+  - price                        # 价格：降幅、议价红线
+  - quantity                     # 数量：协议量、用量变化
+  - access                       # 准入：注册证、中选状态、医保覆盖
+  - substitution                 # 替代：方法学换代、国产品牌替代
+
+rules:
+  lag_months_required: true      # 不建滞后，预警会永远错位
+  bidirectional_required: true   # 集采对经销商是双刃剑（量增 + 竞品出局），不得只建单向边
+  direction_enum: [forward, backward, both]

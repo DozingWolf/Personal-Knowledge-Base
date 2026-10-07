@@ -1,0 +1,18 @@
+[project]
+name = "prj-personal-knowledge-base"
+version = "0.1.0"
+description = "IVD 贸易知识库 / 决策支持系统 —— 平台内核 + 领域包架构"
+requires-python = ">=3.12"
+dependencies = []
+
+# 本项目是「应用 + 领域资产」形态，不构建可分发包；
+# core/ domains/ apps/ 直接作为源码目录使用。
+[tool.uv]
+package = false
+
+# 依赖按模块实施时用 `uv add <pkg>` 逐步引入，不预先堆放。
+# 约定：核心依赖（如 loguru、pyyaml）在第一行代码落地时加入。
+[dependency-groups]
+dev = [
+    "pyyaml>=6.0.3",
+]

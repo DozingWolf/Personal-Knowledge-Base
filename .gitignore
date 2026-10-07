@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 运行产物 / 中间数据（原始快照除外——原始快照属资产，见 docs/02）
+build/
+dist/
+*.egg-info/
+.data/
+*.db
+*.sqlite3
+
+# 日志（loguru 输出）
+logs/
+*.log
+
+# 真实配置含密钥，只提交 example
+config/config.yaml
+config/.env
+.env
+
+# 编辑器 / 系统
+.DS_Store
+.idea/
+.vscode/

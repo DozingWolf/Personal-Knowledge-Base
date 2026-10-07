@@ -1,0 +1,20 @@
+# 统一换行：仓库内一律 LF（macOS 检出即 LF，避免中文文档在跨平台协作时全文件 diff）
+* text=auto eol=lf
+
+# 二进制：禁止换行转换与文本 diff
+*.xlsx binary
+*.xls  binary
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.zip  binary
+
+# 原始快照：保持字节原样（资产不可变，不参与换行归一与文本 diff）
+discuss/sources/raw/** -text -diff
+
+# 文档与数据表按文本处理（便于 review diff）
+*.md   text
+*.yaml text
+*.yml  text
+*.toml text
+*.csv  text

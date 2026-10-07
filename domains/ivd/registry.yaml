@@ -1,0 +1,144 @@
+# IVD 领域包注册表 —— 领域接入平台内核的唯一入口
+# ------------------------------------------------------------------
+# 内核读本文件的「结构」，不读「内容」；因此本文件的键名是契约的一部分，
+# 新增键需先改 core 的装配逻辑（属架构变更，需 ADR）。
+# 状态：骨架。各节按模块实施逐步填充，no 占位即视为"尚未声明"。
+# ------------------------------------------------------------------
+
+domain: ivd
+display_name: 体外诊断试剂贸易
+version: 0.1.0
+status: skeleton
+
+# 本体扩展：领域类型继承内核上层本体概念
+ontology:
+  upper_ontology: core:upper            # 内核提供的上层概念：Organization / Role / Event / Place / Time / Assertion
+  extends_file: null                    # 待建：ontology/entities.yaml（M4 定稿时）
+  entity_types: []                      # 见下方 entity_type_candidates
+  relation_types: []                    # 见下方 relation_type_candidates
+  entity_type_candidates:               # 规划中的领域类型（M4 定稿后转正）
+    - TestItem           # 检测项目（受控词表，政策作用单元）
+    - CodeMap            # 编码映射（TestItem ↔ 旧编码体系）
+    - Analyte            # 检测指标
+    - Methodology        # 方法学
+    - Product            # 产品（品牌×型号×方法学×平台）
+    - Registration       # 注册证
+    - Panel              # 组套（肝功八项、心肌三项）
+    - Tender             # 集采批次
+    - ImpactEdge         # 影响传导边
+    - PriceRuleSet       # 价格规则集
+  relation_type_candidates:
+    - tests_analyte      # Product/TestItem → Analyte
+    - uses_methodology   # Product/TestItem → Methodology
+    - licensed_by        # Product → Registration
+    - member_of_panel    # TestItem → Panel
+    - accepts_for        # Registration → TestItem（核准适用范围）
+    - tendered_in        # Product → Tender
+    - impacts            # Policy/Tender → TestItem/Product（含 mechanism / magnitude / lag_months）
+    - substitutes         # Methodology ↔ Methodology；Product ↔ Product（替代关系）
+
+# 数据来源：声明限速、重试、可信度等级；采集代码不硬编码域名
+sources:
+  - id: nhsa
+    name: 国家医疗保障局
+    base_url: https://www.nhsa.gov.cn
+    crawl: direct            # direct | retry_needed | manual_download
+    credibility: official    # official | authoritative | secondary
+    rate_limit_per_second: 0.5
+    max_retries: 3
+    requires_referer: false
+  - id: smpaa
+    name: 上海市医药集中招标采购事务管理所
+    base_url: https://www.smpaa.cn
+    crawl: retry_needed      # 加速乐反爬：正常 UA + referer + 重试
+    credibility: official
+    rate_limit_per_second: 0.3
+    max_retries: 5
+    requires_referer: true
+  - id: nhsa_tender
+    name: 国家医保招采子系统
+    base_url: null
+    crawl: manual_download   # 需登录，公开网页无；人工下载后登记
+    credibility: official
+    note: 集采中选企业与中选价格清单的唯一来源，本项目最大数据缺口
+  - id: nmpa
+    name: 国家药品监督管理局（注册证）
+    base_url: null
+    crawl: planned
+    credibility: official
+  - id: sunshine_procurement
+    name: 阳光采购挂网价（上海）
+    base_url: null
+    crawl: planned
+    credibility: official
+
+# 文档类型 → 抽取 schema（M3 用；schema 尚未定义时留 null）
+document_types:
+  - id: pricing_guideline_html
+    source: nhsa
+    schema: null
+    note: 立项指南正文页（HTML）
+  - id: pricing_guideline_xlsx
+    source: nhsa
+    schema: null
+    note: 附件1 662 个项目；确定性解析，另有脚本 discuss/sources/scripts/parse_xlsx.py
+  - id: code_mapping_xlsx
+    source: nhsa
+    schema: null
+    note: 附件2 编码映射；NHC_2023 列约 49% 带方法学后缀
+  - id: tender_notice_html
+    source: smpaa
+    schema: null
+    note: 集采执行通知
+
+# 编码体系：注册表而非枚举（新增体系不改代码）
+code_systems:
+  - id: NHSA_MEDICAL
+    name: 医保医疗服务项目分类与代码
+    code_example: "002501010150200"
+    is_external: true
+    note: 附件2 中约 1919 条（去重约 1800）
+  - id: NHC_2023
+    name: 国家卫健委 2023 版技术规范
+    code_example: CAA05EC1
+    is_external: true
+    note: 附件2 中约 1906 条（去重约 1752）；约 49% 带方法学后缀，是映射的关键抓手
+  - id: LOINC
+    name: Logical Observation Identifiers Names and Codes
+    code_example: "2160-0"
+    is_external: true
+    status: planned
+    note: 跨领域通用锚点，未来与其他领域对齐用
+  - id: INTERNAL
+    name: 系统内部标识
+    code_example: TI-0001
+    is_external: false
+
+# 层级模板与评分卡：指向同目录文件
+layer_template: layer_template.yaml
+scorecard: null                # 待建 scorecard.yaml（M13 设计时）
+terminology: null              # 待建 terminology.yaml（用户明确暂缓）
+
+# 审核工作台（M10）卡片字段声明：由领域决定专家看到什么
+review_card:
+  status: skeleton
+  source_fields:               # 左侧：ERP 商品全貌
+    - sku_name
+    - manufacturer
+    - spec
+    - reg_cert_no
+    - registration_scope       # 注册证适用范围原文：专家最信的判断依据
+  candidate_fields:            # 中间：Top-3 候选
+    - item_name
+    - item_seq
+    - service_output           # 原文照搬，最直观说明"这个项目是干什么的"
+    - pricing_note             # 决定映射的商业后果
+    - methodology_list
+    - match_reason
+  actions:                     # 右侧：选项少而明确
+    - pick
+    - none_match_search
+    - no_item                  # 显式声明"不对应任何检验项目"
+    - multi_select
+    - hold_and_escalate        # 必须有，否则专家会硬选污染数据
+  relation_types: [EXACT, PARTIAL, COMPONENT, NO_ITEM, AMBIGUOUS]
