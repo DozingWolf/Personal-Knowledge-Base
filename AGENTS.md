@@ -50,11 +50,12 @@
 - 可调参数集中放**独立配置文件**（`config/config.yaml`），代码走统一加载入口；密钥走环境变量 / `.env`。
 - 存储：**关系型 + 显式边表起步**（SQLite → PostgreSQL 可平移）；图数据库等真正需要"任意路径探索"时再评估。
 - 抓取：来源、限速、重试策略写在配置里，不硬编码；`smpaa.cn` 有反爬，需正常 UA + referer + 重试。
+- **版本控制**：agent 只做 `git add` / `git commit`（提交信息写清改了什么、为什么），**不执行 `git push`、不配置远端凭据、不碰 `~/.ssh`**；推送一律由用户通过 **GitHub Desktop** 完成。远端 `https://github.com/DozingWolf/Personal-Knowledge-Base.git`，分支 `main`。
 
 ## 七、当前阶段
 
 - 已成文：方法论（01）、业务建模（02）、政策（03）、映射设计（04）、组件图（05）、模块划分（06）、平台化预留（07）。
-- 已完成：项目框架（目录、文档体系、内核与领域包骨架、[ADR 0001](docs/decisions/0001-kernel-domain-app-layers.md)、`scripts/check_framework.py`）。
-- 进行中：接入 Git 远端（用户在 GitHub 建仓库）；Python 3.12 环境（`.python-version` 已定）。
+- 已完成：项目框架（目录、文档体系、内核与领域包骨架、[ADR 0001](docs/decisions/0001-kernel-domain-app-layers.md)、`scripts/check_framework.py`）；Python 3.12 + uv 环境；本地 Git 仓库（基线 `c636b6e`，含远端 `LICENSE`）。
+- 进行中：首次提交 `e3ccfc0` **等待用户经 GitHub Desktop 推送**。
 - 下一步候选：**M4 本体定稿**（M3/M9 的共同前置）→ M6 词典 → V1 纵切。
 - 阻塞项：上海集采**中选清单**（需登录招采子系统）、**ERP 商品清单**（待公司交付）。
