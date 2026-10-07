@@ -51,6 +51,7 @@
 - 存储：**关系型 + 显式边表起步**（SQLite → PostgreSQL 可平移）；图数据库等真正需要"任意路径探索"时再评估。
 - 抓取：来源、限速、重试策略写在配置里，不硬编码；`smpaa.cn` 有反爬，需正常 UA + referer + 重试。
 - **版本控制**：agent 只做 `git add` / `git commit`（提交信息写清改了什么、为什么），**不执行 `git push`、不配置远端凭据、不碰 `~/.ssh`**；推送一律由用户通过 **GitHub Desktop** 完成。远端 `https://github.com/DozingWolf/Personal-Knowledge-Base.git`，分支 `main`。
+- **许可**：**GPL-3.0**（见 [ADR 0002](docs/decisions/0002-license-gpl3.md)）。**引入第三方依赖前先核对其许可与 GPLv3 的兼容性**，不得引入不兼容许可的库。
 
 ## 七、当前阶段
 

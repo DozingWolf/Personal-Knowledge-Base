@@ -68,4 +68,6 @@ flowchart LR
 
 ## 六、许可
 
-本项目以 **GPL-3.0** 发布，详见 [LICENSE](LICENSE)。
+本项目以 **GPL-3.0** 发布，详见 [LICENSE](LICENSE)；决策理由、约束与依赖许可核对要求见 [ADR 0002](docs/decisions/0002-license-gpl3.md)。
+
+> 产品**以服务形式提供**，软件本体 copyleft 不构成障碍（GPLv3 无网络服务条款）；但**分发软件本体**（客户私有化部署、发布二进制）时须以 GPL-3.0 提供完整对应源码。
